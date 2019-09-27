@@ -7,6 +7,9 @@
 var app = require('../app');
 var debug = require('debug')('wxapp:server');
 var http = require('http');
+var https = require('https');
+var fs = require('fs');
+var path = require('path');
 
 /**
  * Get port from environment and store in Express.
@@ -28,6 +31,18 @@ var server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
+// local certificate for HTTPS
+var options = {
+  key: fs.readFileSync(path.resolve(__dirname, '../privatekey.pem')),
+  cert: fs.readFileSync(path.resolve(__dirname, '../certificate.pem'))
+};
+
+
+var httpsServer = https.createServer(options, app);
+httpsServer.listen(443);
+httpsServer.on('error', onError);
+httpsServer.on('listening', onListening);
 
 /**
  * Normalize a port into a number, string, or false.
